@@ -1,0 +1,34 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# Model binaries (prevent large/binary model files from being committed)
+models/*.pkl
+models/*.keras
+models/*.h5
+
+# Data files (keep directories tracked with .gitkeep)
+data/resumes/*
+!data/resumes/.gitkeep
+data/jobs/*
+!data/jobs/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Operating System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
