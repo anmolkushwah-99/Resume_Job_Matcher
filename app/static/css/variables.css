@@ -1,0 +1,74 @@
+/* ==========================================================================
+   Design System Variables - AI Resume Screening & Job Matching (ResumeMatch AI)
+   Curated High-Contrast Dark Theme, Typography, Elevation & Tokens
+   ========================================================================== */
+
+:root {
+    /* Brand & Accent Colors */
+    --color-brand-primary: #6366f1;
+    --color-brand-hover: #4f46e5;
+    --color-brand-accent: #818cf8;
+    --color-brand-shadow: rgba(99, 102, 241, 0.35);
+
+    /* Status Colors */
+    --color-success: #10b981;
+    --color-danger: #ef4444;
+    --color-warning: #f59e0b;
+    --color-info: #38bdf8;
+
+    /* Backgrounds (Obsidian / Dark Slate Theme) */
+    --bg-body: #0b0f17;
+    --bg-surface: #111827;
+    --bg-card: #161f30;
+    --bg-hover: #1e293b;
+    --bg-input: #0e1420;
+
+    /* Soft Translucent Backgrounds for Badges & Accents */
+    --bg-brand-soft: rgba(99, 102, 241, 0.15);
+    --bg-success-soft: rgba(16, 185, 129, 0.15);
+    --bg-danger-soft: rgba(239, 68, 68, 0.15);
+    --bg-warning-soft: rgba(245, 158, 11, 0.15);
+    --bg-info-soft: rgba(56, 189, 248, 0.15);
+
+    /* Text Colors - High Contrast & Maximum Readability */
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --text-inverse: #0f172a;
+
+    /* Border Palette */
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-medium: rgba(255, 255, 255, 0.16);
+    --border-strong: rgba(255, 255, 255, 0.28);
+    --border-focus: #6366f1;
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-display: 'Outfit', 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+    /* Shadows & Elevation */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.65);
+
+    /* Layout Spacing & Radii */
+    --sidebar-width: 260px;
+    --topbar-height: 64px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
+
+    /* Layering (Z-Index) */
+    --z-sticky: 10;
+    --z-sidebar: 100;
+    --z-modal: 1000;
+    --z-toast: 2000;
+
+    /* Animation Timing */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}

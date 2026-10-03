@@ -1,0 +1,101 @@
+skill_id,skill_name,category,aliases
+SK001,Python,Programming Language,python;python3;py
+SK002,Java,Programming Language,java;core java;java 8;java 11
+SK003,C++,Programming Language,c++;cpp;c plus plus
+SK004,C,Programming Language,c language;c programming
+SK005,C#,Programming Language,c#;csharp;c sharp;.net c#
+SK006,JavaScript,Programming Language,javascript;js;es6;vanilla js
+SK007,TypeScript,Programming Language,typescript;ts
+SK008,Go,Programming Language,golang;go language
+SK009,Rust,Programming Language,rust;rustlang
+SK010,Ruby,Programming Language,ruby;ruby on rails
+SK011,PHP,Programming Language,php;php7;php8
+SK012,Swift,Programming Language,swift;swiftui
+SK013,Kotlin,Programming Language,kotlin;kotlin android
+SK014,Dart,Programming Language,dart;dartlang
+SK015,R,Programming Language,r programming;r-project
+SK016,Scala,Programming Language,scala;scala programming
+SK017,Bash/Shell,Programming Language,bash;shell;shell scripting;sh;zsh
+SK018,SQL,Programming Language,sql;structured query language
+SK019,Machine Learning,AI/ML,machine learning;ml;statistical learning
+SK020,Deep Learning,AI/ML,deep learning;dl;neural networks
+SK021,Artificial Intelligence,AI/ML,artificial intelligence;ai
+SK022,Natural Language Processing,AI/ML,natural language processing;nlp;text mining;computational linguistics
+SK023,Computer Vision,AI/ML,computer vision;cv;image processing
+SK024,TensorFlow,AI/ML,tensorflow;tf;tf2
+SK025,PyTorch,AI/ML,pytorch;torch
+SK026,Scikit-learn,AI/ML,scikit-learn;sklearn;scikit learn
+SK027,Pandas,AI/ML,pandas;pd
+SK028,NumPy,AI/ML,numpy;np
+SK029,Keras,AI/ML,keras;tf.keras
+SK030,OpenCV,AI/ML,opencv;cv2
+SK031,Hugging Face,AI/ML,hugging face;transformers;huggingface
+SK032,NLTK,AI/ML,nltk;natural language toolkit
+SK033,spaCy,AI/ML,spacy;spacy nlp
+SK034,SciPy,AI/ML,scipy
+SK035,Matplotlib,AI/ML,matplotlib;plt
+SK036,Seaborn,AI/ML,seaborn;sns
+SK037,Feature Engineering,AI/ML,feature engineering;feature extraction;data preprocessing
+SK038,Large Language Models,AI/ML,large language models;llm;llms;generative ai;genai
+SK039,HTML,Web Development,html;html5
+SK040,CSS,Web Development,css;css3
+SK041,React,Web Development,react;react.js;reactjs
+SK042,Angular,Web Development,angular;angularjs;angular 2+
+SK043,Vue.js,Web Development,vue;vue.js;vuejs
+SK044,Node.js,Web Development,node;node.js;nodejs
+SK045,Express.js,Web Development,express;express.js;expressjs
+SK046,Flask,Web Development,flask;flask api
+SK047,Django,Web Development,django;django rest framework;drf
+SK048,FastAPI,Web Development,fastapi;fast api
+SK049,REST API,Web Development,rest api;restful api;rest web services;restful services
+SK050,GraphQL,Web Development,graphql;gql
+SK051,Next.js,Web Development,next.js;nextjs;next
+SK052,Tailwind CSS,Web Development,tailwind;tailwind css;tailwindcss
+SK053,Bootstrap,Web Development,bootstrap;bootstrap 4;bootstrap 5
+SK054,Spring Boot,Web Development,spring boot;spring framework;spring mvc
+SK055,ASP.NET,Web Development,asp.net;asp.net core;.net core web api
+SK056,MySQL,Database,mysql;my sql
+SK057,PostgreSQL,Database,postgresql;postgres;psql
+SK058,MongoDB,Database,mongodb;mongo;nosql mongodb
+SK059,Redis,Database,redis;redis cache
+SK060,SQLite,Database,sqlite;sqlite3
+SK061,Oracle Database,Database,oracle;oracle db;pl/sql
+SK062,Microsoft SQL Server,Database,mssql;sql server;t-sql
+SK063,Cassandra,Database,cassandra;apache cassandra
+SK064,Elasticsearch,Database,elasticsearch;elastic search;elk
+SK065,Firebase Realtime Database,Database,firebase realtime db;firebase database
+SK066,DynamoDB,Database,dynamodb;aws dynamodb
+SK067,Flutter,Mobile Development,flutter;flutter sdk
+SK068,React Native,Mobile Development,react native;rn
+SK069,Android Development,Mobile Development,android;android sdk;android app development
+SK070,iOS Development,Mobile Development,ios;ios sdk;ios app development;xcode
+SK071,Firebase,Mobile Development,firebase;firebase auth;firebase firestore
+SK072,AWS,Cloud/DevOps,aws;amazon web services;amazon cloud
+SK073,Microsoft Azure,Cloud/DevOps,azure;microsoft cloud;ms azure
+SK074,Google Cloud Platform,Cloud/DevOps,gcp;google cloud;google cloud platform
+SK075,Docker,Cloud/DevOps,docker;containerization;docker containers
+SK076,Kubernetes,Cloud/DevOps,kubernetes;k8s;container orchestration
+SK077,Git,Cloud/DevOps,git;version control
+SK078,GitHub,Cloud/DevOps,github;github actions
+SK079,CI/CD,Cloud/DevOps,ci/cd;continuous integration;continuous deployment;pipelines
+SK080,Terraform,Cloud/DevOps,terraform;iac;infrastructure as code
+SK081,Jenkins,Cloud/DevOps,jenkins;jenkins ci
+SK082,Linux,Cloud/DevOps,linux;ubuntu;centos;rhel;unix
+SK083,Nginx,Cloud/DevOps,nginx;nginx web server;reverse proxy
+SK084,Ansible,Cloud/DevOps,ansible;configuration management
+SK085,Apache Spark,Data Engineering,apache spark;spark;pyspark
+SK086,Hadoop,Data Engineering,hadoop;apache hadoop;hdfs
+SK087,Apache Kafka,Data Engineering,apache kafka;kafka;event streaming
+SK088,Airflow,Data Engineering,apache airflow;airflow;workflow orchestration
+SK089,ETL,Data Engineering,etl;data pipeline;extract transform load
+SK090,Data Warehousing,Data Engineering,data warehousing;dwh;star schema
+SK091,Snowflake,Data Engineering,snowflake;snowflake db
+SK092,Figma,Tools/Other,figma;ui/ux design
+SK093,Jira,Tools/Other,jira;atlassian jira;agile board
+SK094,Power BI,Tools/Other,power bi;powerbi;microsoft power bi
+SK095,Tableau,Tools/Other,tableau;tableau desktop;tableau dashboard
+SK096,Postman,Tools/Other,postman;api testing
+SK097,Excel,Tools/Other,excel;ms excel;advanced excel;vlookup;pivot tables
+SK098,Agile/Scrum,Tools/Other,agile;scrum;sprint planning;kanban
+SK099,pypdf,Tools/Other,pypdf;pdf extraction;pdf parser
+SK100,Supabase,Database,supabase;supabase postgresql;supabase auth

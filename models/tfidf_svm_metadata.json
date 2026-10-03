@@ -1,0 +1,14 @@
+{
+  "model_type": "LinearSVC",
+  "C": 1.0,
+  "class_weight": "balanced",
+  "random_state": 42,
+  "max_iter": 2000,
+  "ngram_range": [
+    1,
+    2
+  ],
+  "min_df": 1,
+  "is_trained": true,
+  "feature_count": 1661
+}

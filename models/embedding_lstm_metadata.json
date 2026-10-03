@@ -1,0 +1,24 @@
+{
+  "model_type": "Embedding_LSTM",
+  "framework": "TensorFlow_2.21.0",
+  "max_vocab_size": 5000,
+  "vocab_size": 462,
+  "max_length": 130,
+  "embedding_dim": 64,
+  "lstm_units": 64,
+  "dense_units": 32,
+  "dropout_rates": [
+    0.3,
+    0.2
+  ],
+  "learning_rate": 0.001,
+  "batch_size": 16,
+  "max_epochs": 50,
+  "actual_epochs": 26,
+  "best_epoch": 18,
+  "patience": 8,
+  "threshold": 0.3,
+  "class_weight_mode": "balanced",
+  "random_state": 42,
+  "is_trained": true
+}

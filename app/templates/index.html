@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Based Resume Screening and Job Matching Dashboard powered by Linear SVM and NLP skill gap analysis.">
+    <title>ResumeMatch AI — AI-Based Resume Screening & Job Matching</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Application Styles -->
+    <link rel="stylesheet" href="/static/css/variables.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/matching.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">ResumeMatch AI</span>
+                    <span class="brand-subtitle">Screening System</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <span class="nav-section-title">Navigation</span>
+                <a href="#dashboard" class="nav-item active" data-view="dashboard" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#resumes" class="nav-item" data-view="resumes" id="nav-resumes">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>Resumes</span>
+                </a>
+                <a href="#jobs" class="nav-item" data-view="jobs" id="nav-jobs">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Available Jobs</span>
+                </a>
+                <a href="#matching" class="nav-item" data-view="matching" id="nav-matching">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Find Matches</span>
+                </a>
+                <a href="#history" class="nav-item" data-view="history" id="nav-history">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Match History</span>
+                </a>
+
+                <span class="nav-section-title">Documentation</span>
+                <a href="#about" class="nav-item" data-view="about" id="nav-about">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>How Matching Works</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="model-badge">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span class="status-dot"></span>
+                        <span>Model:</span>
+                    </div>
+                    <span class="model-name">tfidf_svm</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="app-main">
+            <!-- Topbar -->
+            <header class="app-topbar">
+                <div class="topbar-left">
+                    <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="page-breadcrumb">
+                        <span>Application</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--text-tertiary);"></i>
+                        <span class="current-page" id="breadcrumb-current">Dashboard</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="system-health-pill" id="system-health-pill">
+                        <span class="status-dot"></span>
+                        <span>Checking Status...</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="UI.openModal('modal-upload-resume')">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Upload Resume</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Page Container -->
+            <main class="app-content">
+                <!-- VIEW: Dashboard -->
+                <section class="page-view active" id="view-dashboard">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>Screening & Matching Overview</h1>
+                            <p>Supervised Linear SVM inference with extracted NLP skill gap analysis.</p>
+                        </div>
+                    </div>
+
+                    <!-- Metric Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-data">
+                                <span class="metric-label">Parsed Resumes</span>
+                                <span class="metric-value" id="stat-total-resumes">0</span>
+                                <span class="metric-subtext">Active Candidate Profiles</span>
+                            </div>
+                            <div class="metric-icon-wrap icon-blue">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-data">
+                                <span class="metric-label">Benchmark Jobs</span>
+                                <span class="metric-value" id="stat-total-jobs">0</span>
+                                <span class="metric-subtext">Evaluated Job Roles</span>
+                            </div>
+                            <div class="metric-icon-wrap icon-purple">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-data">
+                                <span class="metric-label">Matching Evaluations</span>
+                                <span class="metric-value" id="stat-total-matches">0</span>
+                                <span class="metric-subtext">Database Logged Pairs</span>
+                            </div>
+                            <div class="metric-icon-wrap icon-green">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-data">
+                                <span class="metric-label">Inference Engine</span>
+                                <span class="metric-value" style="font-size:1.3rem;" id="stat-model-name">tfidf_svm</span>
+                                <span class="metric-subtext">LinearSVC (C=1.0, balanced)</span>
+                            </div>
+                            <div class="metric-icon-wrap icon-amber">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Grid: Quick Match + System Info -->
+                    <div class="dashboard-grid">
+                        <div class="quick-match-box">
+                            <div class="quick-match-header">
+                                <h3 class="quick-match-title">
+                                    <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-brand-accent);"></i> Quick Match Evaluation
+                                </h3>
+                                <p class="quick-match-desc">Select an uploaded resume to compute multi-job matching against all benchmark jobs.</p>
+                            </div>
+                            <div class="quick-match-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="dashboard-resume-select">Select Candidate Resume</label>
+                                    <select class="form-select" id="dashboard-resume-select">
+                                        <option value="">Loading resumes...</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="btn-dashboard-match">
+                                    <i class="fa-solid fa-play"></i> Run Multi-Job Matching
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-solid fa-server"></i> System Architecture</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="system-status-list">
+                                    <div class="system-status-item">
+                                        <span class="status-label">Model Architecture</span>
+                                        <span class="status-val">LinearSVC (scikit-learn)</span>
+                                    </div>
+                                    <div class="system-status-item">
+                                        <span class="status-label">Feature Pipeline</span>
+                                        <span class="status-val">TF-IDF (5,000 unigrams/bigrams)</span>
+                                    </div>
+                                    <div class="system-status-item">
+                                        <span class="status-label">Decision Threshold</span>
+                                        <span class="status-val">&theta; = 0.0000 (signed score)</span>
+                                    </div>
+                                    <div class="system-status-item">
+                                        <span class="status-label">Ranking Semantics</span>
+                                        <span class="status-val">decision_score DESC, job_id ASC</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Matching Activity -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Matching Activity</h3>
+                            <a href="#history" class="btn btn-secondary btn-sm">View Full History</a>
+                        </div>
+                        <div class="card-body">
+                            <div class="activity-list" id="recent-activity-list">
+                                <div class="state-container" style="padding:1.5rem;">
+                                    <span class="spinner spinner-sm"></span>
+                                    <p class="text-tertiary" style="margin-top:0.5rem;">Loading activity...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Resumes -->
+                <section class="page-view" id="view-resumes">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>Candidate Resumes</h1>
+                            <p>Manage uploaded resumes and inspect NLP extracted skills, education, and experience.</p>
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn btn-primary" onclick="UI.openModal('modal-upload-resume')">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Upload New Resume
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
+                            <div class="data-table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resume ID</th>
+                                            <th>Candidate</th>
+                                            <th>Extracted Skills</th>
+                                            <th>Education / Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resumes-table-body">
+                                        <tr><td colspan="5" style="text-align:center; padding: 2rem;">Loading resumes...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Jobs -->
+                <section class="page-view" id="view-jobs">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>Benchmark Jobs</h1>
+                            <p>Available jobs evaluated by the machine learning matching engine.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
+                            <div class="data-table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Job ID</th>
+                                            <th>Job Title</th>
+                                            <th>Required Skills</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="jobs-table-body">
+                                        <tr><td colspan="4" style="text-align:center; padding: 2rem;">Loading jobs...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: Matching Workflow -->
+                <section class="page-view" id="view-matching">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>Find Matching Jobs</h1>
+                            <p>Execute Step 10 multi-job SVM inference and inspect ranked matches with skill gap analysis.</p>
+                        </div>
+                    </div>
+
+                    <!-- Toolbar -->
+                    <div class="match-toolbar">
+                        <div class="match-toolbar-left">
+                            <div class="form-group" style="margin-bottom:0; flex:1;">
+                                <label class="form-label" style="font-size:0.78rem;" for="match-resume-select">Candidate Resume</label>
+                                <select class="form-select" id="match-resume-select">
+                                    <option value="">Loading resumes...</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0; width:120px;">
+                                <label class="form-label" style="font-size:0.78rem;" for="match-top-k-select">Top-K</label>
+                                <select class="form-select" id="match-top-k-select">
+                                    <option value="all">All Jobs</option>
+                                    <option value="5">Top 5</option>
+                                    <option value="10">Top 10</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="btn-run-match" style="margin-top:1.4rem;">
+                                <i class="fa-solid fa-play"></i> Find Matches
+                            </button>
+                        </div>
+
+                        <div class="match-toolbar-right">
+                            <div class="search-input-wrap">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" class="form-control" id="match-search-input" placeholder="Search evaluated jobs...">
+                            </div>
+                            <div class="filter-btn-group">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="match_only">Matches</button>
+                                <button class="filter-btn" data-filter="non_match">Non-Matches</button>
+                            </div>
+                            <button class="btn btn-outline-brand btn-sm" id="btn-open-compare" style="display:none;">
+                                <i class="fa-solid fa-code-compare"></i> Compare Selected (0)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="state-container" id="match-loading-state" style="display:none;">
+                        <div class="spinner"></div>
+                        <h3 class="state-title" style="margin-top:1.25rem;">Analyzing Resume & Calculating Matches...</h3>
+                        <p class="state-description">Running single-request multi-job Linear SVM inference, calculating decision scores, and extracting skill gaps.</p>
+                    </div>
+
+                    <!-- Empty Initial State -->
+                    <div class="state-container" id="match-empty-state">
+                        <i class="fa-solid fa-wand-magic-sparkles state-icon"></i>
+                        <h3 class="state-title">No Evaluation Run Yet</h3>
+                        <p class="state-description">Select a candidate resume above and click "Find Matches" to execute the production SVM matching engine.</p>
+                    </div>
+
+                    <!-- Summary Banner -->
+                    <div class="match-summary-banner" id="match-summary-banner" style="display:none;">
+                        <div class="summary-resume-info">
+                            <div class="summary-icon"><i class="fa-solid fa-user-check"></i></div>
+                            <div class="summary-text">
+                                <h3 id="summary-resume-name">Resume ID: -</h3>
+                                <p>Evaluated using production LinearSVC model (threshold &theta; = 0.0000)</p>
+                            </div>
+                        </div>
+                        <div class="summary-stats-pills">
+                            <div class="summary-stat-box">
+                                <div class="summary-stat-num" id="summary-jobs-evaluated">0</div>
+                                <div class="summary-stat-lbl">Jobs Evaluated</div>
+                            </div>
+                            <div class="summary-stat-box">
+                                <div class="summary-stat-num" style="color:var(--color-success);" id="summary-predicted-matches">0</div>
+                                <div class="summary-stat-lbl">Predicted Matches</div>
+                            </div>
+                            <div class="summary-stat-box">
+                                <div class="summary-stat-num" style="color:var(--color-brand-primary);" id="summary-top-score">0.0000</div>
+                                <div class="summary-stat-lbl">Top Decision Score</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Match Results List -->
+                    <div class="match-results-list" id="match-results-container"></div>
+                </section>
+
+                <!-- VIEW: Match History -->
+                <section class="page-view" id="view-history">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>Matching Evaluation History</h1>
+                            <p>Historical resume–job inference results persisted in the database.</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body" style="padding:0;">
+                            <div class="data-table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Resume ID</th>
+                                            <th>Job Title / ID</th>
+                                            <th>Model</th>
+                                            <th>Decision Score</th>
+                                            <th>Status</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="history-table-body">
+                                        <tr><td colspan="6" style="text-align:center; padding: 2rem;">Loading history...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: How Matching Works (About) -->
+                <section class="page-view" id="view-about">
+                    <div class="page-header">
+                        <div class="header-title-wrap">
+                            <h1>How Matching Works</h1>
+                            <p>Academic methodology and explainability guide for the AI-Based Resume Screening System.</p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-solid fa-diagram-project"></i> End-to-End Processing Pipeline</h3>
+                            </div>
+                            <div class="card-body">
+                                <ol style="padding-left:1.5rem; display:flex; flex-direction:column; gap:0.75rem; color:var(--text-secondary);">
+                                    <li><strong style="color:var(--text-primary);">Resume Text Extraction:</strong> Uploaded PDF resumes are parsed using <code>pypdf</code> with privacy-safe storage.</li>
+                                    <li><strong style="color:var(--text-primary);">NLP Entity & Skill Extraction:</strong> spaCy and NLTK tokenize text, detect sections (Education, Experience, Skills), and extract candidate competencies.</li>
+                                    <li><strong style="color:var(--text-primary);">TF-IDF Feature Representation:</strong> Resume text and job description are transformed into a combined TF-IDF feature space (5,000 max features, unigrams & bigrams).</li>
+                                    <li><strong style="color:var(--text-primary);">Supervised Linear SVM Inference:</strong> The frozen <code>LinearSVC</code> (C=1.0, balanced class weight) computes the signed hyperplane distance.</li>
+                                    <li><strong style="color:var(--text-primary);">Ranking & Classification:</strong> Jobs are classified as <code>MATCH</code> if <code>decision_score &ge; 0.0</code> and ranked strictly by <code>decision_score DESC</code> with tie-breaker <code>job_id ASC</code>.</li>
+                                    <li><strong style="color:var(--text-primary);">Skill Gap Explanation:</strong> Candidate skills and job required skills are intersected to compute matched skills, missing skills, and auxiliary skill overlap ratio.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="card" style="border-left: 4px solid var(--color-warning);">
+                            <div class="card-header">
+                                <h3 class="card-title"><i class="fa-solid fa-circle-info" style="color:var(--color-warning);"></i> Critical Interpretation Guidelines</h3>
+                            </div>
+                            <div class="card-body">
+                                <p style="color:var(--text-secondary); margin-bottom:1rem;">
+                                    <strong style="color:var(--text-primary);">1. Decision Score is Not a Probability:</strong> LinearSVC produces a signed geometric distance from the separating hyperplane. A score of <code>1.4521</code> indicates strong positive separation, NOT 145% or 92% probability.
+                                </p>
+                                <p style="color:var(--text-secondary); margin-bottom:1rem;">
+                                    <strong style="color:var(--text-primary);">2. Skill Overlap is an Auxiliary Signal:</strong> Skill Overlap Ratio measures keyword intersection <code>|Resume Skills &cap; Job Skills| / |Job Skills|</code>. It provides human explainability and does not replace the SVM decision score.
+                                </p>
+                                <p style="color:var(--text-secondary);">
+                                    <strong style="color:var(--text-primary);">3. Decision Support Only:</strong> This application is designed as an academic decision-support tool for recruiters and candidates. It does not automate final hiring decisions.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL: Upload Resume -->
+    <div class="modal-backdrop" id="modal-upload-resume">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF Resume</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-upload-resume')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="resume-upload-form">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="resume-file-input">Select PDF File <span style="color:var(--color-danger);">*</span></label>
+                        <input type="file" class="form-control" id="resume-file-input" accept=".pdf" required>
+                        <span class="text-tertiary" style="font-size:0.75rem; margin-top:0.25rem; display:block;">Supported format: PDF only (max 10MB)</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="resume-custom-id">Custom Resume ID (Optional)</label>
+                        <input type="text" class="form-control" id="resume-custom-id" placeholder="e.g. candidate_john_doe">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="UI.closeModal('modal-upload-resume')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-upload-submit">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Process
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Resume Details -->
+    <div class="modal-backdrop" id="modal-resume-details">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-file-lines"></i> Candidate Profile</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-resume-details')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:1.25rem;">
+                    <h4 id="modal-resume-name" style="font-family:var(--font-display); font-size:1.25rem; font-weight:700;">Candidate</h4>
+                    <span class="text-tertiary" id="modal-resume-id" style="font-family:var(--font-mono); font-size:0.8rem;">ID: -</span>
+                </div>
+                <div style="margin-bottom:1.5rem;">
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Extracted Skills</h5>
+                    <div class="skill-chips" id="modal-resume-skills"></div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                    <div>
+                        <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Education</h5>
+                        <ul id="modal-resume-education" style="padding-left:1.25rem; font-size:0.88rem; color:var(--text-secondary);"></ul>
+                    </div>
+                    <div>
+                        <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Experience Summary</h5>
+                        <ul id="modal-resume-experience" style="padding-left:1.25rem; font-size:0.88rem; color:var(--text-secondary);"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="UI.closeModal('modal-resume-details')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Job Details -->
+    <div class="modal-backdrop" id="modal-single-job-details">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-briefcase"></i> Job Details</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-single-job-details')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:1.25rem;">
+                    <h4 id="modal-single-job-title" style="font-family:var(--font-display); font-size:1.25rem; font-weight:700;">Job Title</h4>
+                    <span class="text-tertiary" id="modal-single-job-id" style="font-family:var(--font-mono); font-size:0.8rem;">ID: -</span>
+                </div>
+                <div style="margin-bottom:1.25rem;">
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Description</h5>
+                    <p id="modal-single-job-desc" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5;"></p>
+                </div>
+                <div>
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Required Skills</h5>
+                    <div class="skill-chips" id="modal-single-job-skills"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="UI.closeModal('modal-single-job-details')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Match Evaluation Details -->
+    <div class="modal-backdrop" id="modal-match-details">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-magnifying-glass-chart"></i> Match Result Analysis</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-match-details')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+                    <div>
+                        <h4 id="modal-job-title" style="font-family:var(--font-display); font-size:1.35rem; font-weight:700;">Job Title</h4>
+                        <span class="text-tertiary" id="modal-job-id" style="font-family:var(--font-mono); font-size:0.8rem;">ID: -</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <div class="score-display-box">
+                            <span class="score-display-label">Decision Score</span>
+                            <span class="score-display-value" id="modal-decision-score">0.0000</span>
+                        </div>
+                        <div class="overlap-display-box">
+                            <span class="score-display-label">Skill Overlap</span>
+                            <span class="score-display-value" id="modal-skill-overlap">0%</span>
+                        </div>
+                        <div id="modal-match-status"></div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom:1.5rem;">
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Job Description</h5>
+                    <p id="modal-job-desc" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.5;"></p>
+                </div>
+
+                <div style="margin-bottom:1.5rem;">
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Required Skills</h5>
+                    <div class="skill-chips" id="modal-job-skills"></div>
+                </div>
+
+                <div class="result-skills-breakdown" style="margin-bottom:1rem;">
+                    <div>
+                        <div class="skill-category-title title-matched"><i class="fa-solid fa-circle-check"></i> Matched Competencies</div>
+                        <div class="skill-chips" id="modal-matched-skills"></div>
+                    </div>
+                    <div>
+                        <div class="skill-category-title title-missing"><i class="fa-regular fa-circle-xmark"></i> Missing Competencies</div>
+                        <div class="skill-chips" id="modal-missing-skills"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="UI.closeModal('modal-match-details')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Comparison -->
+    <div class="modal-backdrop" id="modal-comparison">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="fa-solid fa-code-compare"></i> Side-by-Side Job Comparison</h3>
+                <button class="modal-close" onclick="UI.closeModal('modal-comparison')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="comparison-grid" id="comparison-grid"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="UI.closeModal('modal-comparison')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/matching.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

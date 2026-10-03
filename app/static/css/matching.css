@@ -1,0 +1,360 @@
+/* ==========================================================================
+   Matching & Evaluation Specific Styles
+   ========================================================================== */
+
+/* Match Control Toolbar */
+.match-toolbar {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.match-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+    min-width: 280px;
+}
+
+.match-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrap {
+    position: relative;
+    width: 260px;
+}
+
+.search-input-wrap i {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+}
+
+.search-input-wrap .form-control {
+    padding-left: 2.25rem;
+}
+
+.filter-btn-group {
+    display: inline-flex;
+    background-color: var(--bg-body);
+    padding: 3px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+.filter-btn {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.filter-btn.active {
+    background-color: var(--bg-surface);
+    color: var(--color-brand-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Match Summary Overview Card */
+.match-summary-banner {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.summary-resume-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.summary-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-brand-soft);
+    color: var(--color-brand-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.summary-text h3 {
+    font-size: 1.15rem;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.summary-text p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.summary-stats-pills {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.summary-stat-box {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.summary-stat-num {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.summary-stat-lbl {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* Results Grid / List */
+.match-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Match Result Card */
+.match-result-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    position: relative;
+}
+
+.match-result-card:hover {
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-md);
+}
+
+.match-result-card.is-match-card {
+    border-left: 4px solid var(--color-success);
+}
+
+.match-result-card.is-nonmatch-card {
+    border-left: 4px solid var(--border-medium);
+}
+
+.result-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.result-title-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.rank-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-body);
+    border: 1px solid var(--border-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    flex-shrink: 0;
+}
+
+.rank-badge.top-rank {
+    background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 2px 8px var(--color-brand-shadow);
+}
+
+.result-job-meta h4 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.result-job-meta .job-id-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+.result-scores-section {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.score-display-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.score-display-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-tertiary);
+}
+
+.score-display-value {
+    font-family: var(--font-mono);
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.score-positive {
+    color: var(--color-success);
+}
+
+.score-negative {
+    color: var(--text-tertiary);
+}
+
+.overlap-display-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border-subtle);
+}
+
+/* Skills Breakdown inside Card */
+.result-skills-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--bg-body);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 768px) {
+    .result-skills-breakdown {
+        grid-template-columns: 1fr;
+    }
+}
+
+.skill-category-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.title-matched {
+    color: var(--color-success);
+}
+
+.title-missing {
+    color: var(--text-tertiary);
+}
+
+.result-card-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+}
+
+/* Comparison Drawer / Side-by-side */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+
+.compare-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.compare-header {
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.75rem;
+}
+
+.compare-header h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.compare-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border-subtle);
+}

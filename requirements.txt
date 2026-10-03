@@ -2,8 +2,10 @@
 pandas>=2.0.0
 numpy>=1.24.0
 
-# Machine Learning
+# Machine Learning & Deep Learning
 scikit-learn>=1.3.0
+joblib>=1.3.0
+tensorflow>=2.15.0
 
 # Natural Language Processing
 nltk>=3.8.0
@@ -11,6 +13,11 @@ spacy>=3.7.0
 
 # PDF Text Extraction
 pypdf>=4.0.0
+
+# Database & Cloud Storage
+pymysql>=1.1.0
+cryptography>=41.0.0
+python-dotenv>=1.0.0
 
 # Backend & Web Services
 Flask>=3.0.0
