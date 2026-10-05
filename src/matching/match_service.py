@@ -66,6 +66,15 @@ def get_resume_skills_from_db_or_nlp(resume_id: str) -> List[str]:
         except Exception:
             pass
 
+    # Try on-demand NLP processing if resume exists in DB with extracted text
+    try:
+        from src.preprocessing.nlp_service import process_resume_by_id
+        nlp_res = process_resume_by_id(resume_id.strip())
+        if nlp_res and "skills" in nlp_res:
+            return [s.get("skill_name") for s in nlp_res["skills"] if s.get("skill_name")]
+    except Exception as nlp_e:
+        logger.debug("On-demand NLP extraction fallback failed for %s: %s", resume_id, str(nlp_e))
+
     return []
 
 

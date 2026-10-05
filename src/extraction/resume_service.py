@@ -137,17 +137,18 @@ def validate_resume_file(file_storage_or_bytes: Any, filename: Optional[str] = N
 def process_resume_upload(
     file_input: Any,
     filename: Optional[str] = None,
-    user_id: Optional[str] = None
+    user_id: Optional[str] = None,
+    resume_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Complete Resume Upload and Text Extraction Pipeline with MySQL persistence.
+    Complete end-to-end processing pipeline for an uploaded resume PDF (Step 3).
 
     Workflow:
     1. Validate PDF file (type, size, filename).
     2. Extract text from PDF using pypdf.
     3. Validate extracted text is non-empty.
     4. Clean and normalize extracted text.
-    5. Generate unique UUID and safe local file path.
+    5. Generate unique UUID / custom ID and safe local file path.
     6. Save PDF to local file storage.
     7. Insert resume record into MySQL 'resumes' table.
     8. Roll back local file if database insertion fails.
@@ -156,6 +157,7 @@ def process_resume_upload(
     :param file_input: FileStorage, file stream, or bytes.
     :param filename: Original filename if input is raw bytes.
     :param user_id: Optional UUID of candidate/user.
+    :param resume_id: Optional custom identifier for the resume (e.g. res001).
     :return: Dict containing success status, resume_id, filename, and text_length.
     """
     # Step 1: Validate file
@@ -176,8 +178,11 @@ def process_resume_upload(
         logger.warning("Uploaded PDF '%s' yielded no extractable text.", safe_name)
         raise EmptyPDFError("The uploaded PDF does not contain any extractable text.")
 
-    # Step 5: Prepare Storage Path and UUID
-    upload_uuid = str(uuid.uuid4())
+    # Step 5: Prepare Storage Path and Identifier
+    if resume_id and str(resume_id).strip():
+        upload_uuid = str(resume_id).strip()[:36]
+    else:
+        upload_uuid = str(uuid.uuid4())
     relative_storage_path = f"{upload_uuid}/{safe_name}"
 
     # Step 6: Save PDF to Local Storage

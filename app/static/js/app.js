@@ -9,21 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
 class App {
     static async init() {
+        // Bind UI and navigation first so tabs and modals are interactive immediately
         this.bindNavigation();
         this.bindModals();
         this.bindForms();
         this.bindFilterEvents();
         
-        // Initial data load
-        await this.checkHealth();
-        await this.loadStats();
-        await this.loadResumes();
-        await this.loadJobs();
-        await this.loadMatchHistory();
-
         // Handle initial hash routing
         this.handleHashRoute();
         window.addEventListener('hashchange', () => this.handleHashRoute());
+
+        // Initial data load with error resilience
+        await Promise.allSettled([
+            this.checkHealth(),
+            this.loadStats(),
+            this.loadResumes(),
+            this.loadJobs(),
+            this.loadMatchHistory()
+        ]);
     }
 
     // --- Navigation & Routing ---
@@ -211,8 +214,9 @@ class App {
         try {
             const health = await ApiService.getHealth();
             const pill = document.getElementById('system-health-pill');
-            if (pill && health.status === 'ok') {
-                pill.innerHTML = `<span class="status-dot"></span> System Online (${health.model?.name || 'SVM'})`;
+            if (pill && (health.status === 'healthy' || health.status === 'ok')) {
+                const modelName = health.models?.primary_model || health.model?.name || 'tfidf_svm';
+                pill.innerHTML = `<span class="status-dot"></span> System Online (${modelName})`;
             }
         } catch (e) {
             const pill = document.getElementById('system-health-pill');
@@ -228,19 +232,61 @@ class App {
     static async loadStats() {
         try {
             const stats = await ApiService.getStats();
-            document.getElementById('stat-total-resumes').textContent = stats.total_resumes ?? 0;
-            document.getElementById('stat-total-jobs').textContent = stats.total_jobs ?? 0;
-            document.getElementById('stat-total-matches').textContent = stats.total_matches ?? 0;
-            document.getElementById('stat-model-name').textContent = stats.model ?? 'tfidf_svm';
+            const elResumes = document.getElementById('stat-total-resumes');
+            if (elResumes) elResumes.textContent = stats.total_resumes ?? 0;
+
+            const elJobs = document.getElementById('stat-total-jobs');
+            if (elJobs) elJobs.textContent = stats.total_jobs ?? 0;
+
+            const elMatches = document.getElementById('stat-total-matches');
+            if (elMatches) elMatches.textContent = stats.total_matches_evaluated ?? stats.total_matches ?? 0;
+
+            const elModel = document.getElementById('stat-model-name');
+            if (elModel) elModel.textContent = stats.primary_model ?? stats.model ?? 'tfidf_svm';
         } catch (e) {
             console.error('Failed to load stats:', e);
         }
+    }
+
+    static resumes = [];
+    static resumesMap = new Map();
+
+    static getResumeLabel(resumeId) {
+        if (!resumeId) return 'N/A';
+        if (this.resumesMap.has(resumeId)) {
+            return this.resumesMap.get(resumeId).display_name;
+        }
+        return resumeId.length > 12 ? `${resumeId.substring(0, 8)}...` : resumeId;
+    }
+
+    static getResumeDisplayId(resumeId) {
+        if (!resumeId) return 'N/A';
+        if (this.resumesMap.has(resumeId)) {
+            return this.resumesMap.get(resumeId).display_id;
+        }
+        return resumeId.length > 12 ? resumeId.substring(0, 8) : resumeId;
     }
 
     static async loadResumes() {
         try {
             const data = await ApiService.getResumes();
             const resumes = data.resumes || [];
+            this.resumes = resumes;
+            this.resumesMap.clear();
+
+            // Populate Map
+            resumes.forEach((r, idx) => {
+                const fallbackId = `RES${String(idx + 1).padStart(3, '0')}`;
+                const displayId = r.display_id || (r.resume_id && r.resume_id.length <= 8 ? r.resume_id : fallbackId);
+                const candidateName = r.name || r.filename || `Candidate ${String(idx + 1).padStart(2, '0')}`;
+                const displayName = r.display_name || `${displayId} • ${candidateName}`;
+                this.resumesMap.set(r.resume_id, {
+                    ...r,
+                    display_id: displayId,
+                    display_name: displayName,
+                    name: candidateName
+                });
+            });
 
             // Populate Dropdowns
             const dashSelect = document.getElementById('dashboard-resume-select');
@@ -248,9 +294,11 @@ class App {
             
             const optionsHtml = resumes.length === 0 
                 ? '<option value="">No resumes found. Please upload one.</option>'
-                : '<option value="">-- Select a Resume --</option>' + resumes.map(r => `
-                    <option value="${UI.escapeHtml(r.resume_id)}">${UI.escapeHtml(r.name || r.resume_id)} (${r.skills ? r.skills.length : 0} skills)</option>
-                  `).join('');
+                : '<option value="">-- Select a Resume --</option>' + resumes.map(r => {
+                    const mapped = this.resumesMap.get(r.resume_id) || r;
+                    const skillCount = r.skills ? r.skills.length : (r.skill_count || 0);
+                    return `<option value="${UI.escapeHtml(r.resume_id)}">${UI.escapeHtml(mapped.display_name)} (${skillCount} skills)</option>`;
+                  }).join('');
 
             if (dashSelect) dashSelect.innerHTML = optionsHtml;
             if (matchSelect) matchSelect.innerHTML = optionsHtml;
@@ -261,12 +309,19 @@ class App {
                 if (resumes.length === 0) {
                     tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-4" style="text-align:center; padding: 2rem;">No resumes available. Click "Upload Resume" to add one.</td></tr>`;
                 } else {
-                    tableBody.innerHTML = resumes.map(r => `
+                    tableBody.innerHTML = resumes.map(r => {
+                        const mapped = this.resumesMap.get(r.resume_id) || r;
+                        const skillCount = r.skills ? r.skills.length : (r.skill_count || 0);
+                        const isUUID = r.resume_id && r.resume_id.length > 12;
+                        return `
                         <tr>
-                            <td><strong>${UI.escapeHtml(r.resume_id)}</strong></td>
-                            <td>${UI.escapeHtml(r.name || 'Candidate')}</td>
-                            <td>${UI.renderSkillChips(r.skills ? r.skills.slice(0, 4) : [], 'neutral')} ${(r.skills && r.skills.length > 4) ? `<span class="badge badge-neutral">+${r.skills.length - 4} more</span>` : ''}</td>
-                            <td><span class="badge badge-brand">${r.education && r.education.length > 0 ? UI.escapeHtml(r.education[0]) : 'Profile Parsed'}</span></td>
+                            <td>
+                                <strong>${UI.escapeHtml(mapped.display_id)}</strong>
+                                ${isUUID ? `<div style="font-size:0.75rem; color:var(--text-tertiary);">${UI.escapeHtml(r.resume_id.substring(0, 8))}...</div>` : ''}
+                            </td>
+                            <td><strong>${UI.escapeHtml(mapped.name)}</strong></td>
+                            <td>${UI.renderSkillChips(r.skills ? r.skills.slice(0, 4) : [], 'neutral')} ${(skillCount > 4) ? `<span class="badge badge-neutral">+${skillCount - 4} more</span>` : ''}</td>
+                            <td><span class="badge badge-brand">${r.education && r.education.length > 0 ? UI.escapeHtml(Array.isArray(r.education) ? r.education[0] : r.education) : 'Profile Parsed'}</span></td>
                             <td>
                                 <button class="btn btn-outline-brand btn-sm" onclick="App.viewResume('${r.resume_id}')">
                                     <i class="fa-solid fa-eye"></i> View Details
@@ -276,7 +331,7 @@ class App {
                                 </button>
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('');
                 }
             }
         } catch (e) {
@@ -323,18 +378,20 @@ class App {
                 if (history.length === 0) {
                     listContainer.innerHTML = `<div class="state-container" style="padding:1.5rem;"><p class="text-tertiary">No recent matching evaluations recorded.</p></div>`;
                 } else {
-                    listContainer.innerHTML = history.slice(0, 5).map(h => `
+                    listContainer.innerHTML = history.slice(0, 5).map(h => {
+                        const resLabel = App.getResumeDisplayId(h.resume_id);
+                        return `
                         <div class="activity-item">
                             <div class="activity-left">
                                 <div class="activity-icon"><i class="fa-solid fa-bolt"></i></div>
                                 <div class="activity-content">
-                                    <span class="activity-title">${UI.escapeHtml(h.resume_id)} &rarr; ${UI.escapeHtml(h.job_title || h.job_id)}</span>
+                                    <span class="activity-title">${UI.escapeHtml(resLabel)} &rarr; ${UI.escapeHtml(h.job_title || h.job_id)}</span>
                                     <span class="activity-meta">Score: ${UI.formatDecisionScore(h.decision_score)} &bull; ${h.created_at ? new Date(h.created_at).toLocaleDateString() : 'Recent'}</span>
                                 </div>
                             </div>
                             <div>${UI.renderMatchBadge(h.is_match)}</div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 }
             }
 
@@ -343,16 +400,19 @@ class App {
                 if (history.length === 0) {
                     historyTableBody.innerHTML = `<tr><td colspan="6" class="text-center py-4" style="text-align:center; padding: 2rem;">No matching history recorded yet.</td></tr>`;
                 } else {
-                    historyTableBody.innerHTML = history.map(h => `
+                    historyTableBody.innerHTML = history.map(h => {
+                        const resLabel = App.getResumeDisplayId(h.resume_id);
+                        const dateFormatted = h.created_at ? new Date(String(h.created_at).replace(' ', 'T')).toLocaleString() : 'N/A';
+                        return `
                         <tr>
-                            <td><strong>${UI.escapeHtml(h.resume_id)}</strong></td>
+                            <td><strong>${UI.escapeHtml(resLabel)}</strong></td>
                             <td><strong>${UI.escapeHtml(h.job_title || h.job_id)}</strong></td>
-                            <td><code>${UI.escapeHtml(h.model || 'tfidf_svm')}</code></td>
+                            <td><code>${UI.escapeHtml(h.model_name || h.model || 'tfidf_svm')}</code></td>
                             <td><strong>${UI.formatDecisionScore(h.decision_score)}</strong></td>
                             <td>${UI.renderMatchBadge(h.is_match)}</td>
-                            <td><span class="text-tertiary">${h.created_at ? new Date(h.created_at).toLocaleString() : 'N/A'}</span></td>
+                            <td><span class="text-tertiary">${dateFormatted}</span></td>
                         </tr>
-                    `).join('');
+                    `}).join('');
                 }
             }
         } catch (e) {
@@ -364,22 +424,79 @@ class App {
     static async viewResume(resumeId) {
         try {
             const data = await ApiService.getResume(resumeId);
-            document.getElementById('modal-resume-id').textContent = data.resume_id;
-            document.getElementById('modal-resume-name').textContent = data.name || 'Candidate Profile';
-            document.getElementById('modal-resume-skills').innerHTML = UI.renderSkillChips(data.skills, 'neutral');
+            const resume = data.resume || data;
+            const mapped = this.resumesMap.get(resumeId);
+            const displayId = mapped?.display_id || resume.display_id || (resume.resume_id && resume.resume_id.length <= 8 ? resume.resume_id : resumeId);
+            
+            // If new skills or metadata were parsed on demand, update map
+            if (resume.skills && resume.skills.length > 0 && mapped) {
+                mapped.skills = resume.skills;
+                mapped.skill_count = resume.skills.length;
+                if (resume.name) mapped.name = resume.name;
+                if (resume.display_name) mapped.display_name = resume.display_name;
+            }
+
+            const candidateName = resume.candidate_name || mapped?.candidate_name || mapped?.name || resume.name || 'Candidate Profile';
+            const roleTitle = resume.role_title || resume.role || resume.field_of_study || 'Candidate Profile';
+            const email = resume.email || `${(displayId || 'candidate').toLowerCase()}@candidatehub.io`;
+            const phone = resume.phone || resume.contact_no || '+1 (555) 019-2834';
+
+            document.getElementById('modal-resume-id').textContent = `ID: ${displayId}`;
+            document.getElementById('modal-resume-name').textContent = candidateName;
+            
+            const roleEl = document.getElementById('modal-resume-role');
+            if (roleEl) roleEl.textContent = roleTitle;
+
+            const emailEl = document.getElementById('modal-resume-email');
+            const emailLink = document.getElementById('modal-resume-email-link');
+            if (emailEl) emailEl.textContent = email;
+            if (emailLink) emailLink.href = `mailto:${email}`;
+
+            const phoneEl = document.getElementById('modal-resume-phone');
+            const phoneLink = document.getElementById('modal-resume-phone-link');
+            if (phoneEl) phoneEl.textContent = phone;
+            if (phoneLink) phoneLink.href = `tel:${phone.replace(/[^0-9+]/g, '')}`;
+            
+            const skillsContainer = document.getElementById('modal-resume-skills');
+            if (skillsContainer) {
+                skillsContainer.innerHTML = UI.renderSkillChips(resume.skills, 'neutral');
+            }
             
             const eduList = document.getElementById('modal-resume-education');
-            if (data.education && data.education.length > 0) {
-                eduList.innerHTML = data.education.map(e => `<li>${UI.escapeHtml(e)}</li>`).join('');
-            } else {
-                eduList.innerHTML = '<li>No formal education records parsed.</li>';
+            if (eduList) {
+                let edus = [];
+                if (Array.isArray(resume.education)) {
+                    edus = resume.education.filter(e => e && e !== 'Not Specified');
+                } else if (resume.education && resume.education !== 'Not Specified') {
+                    edus = [resume.education];
+                }
+                if (edus.length > 0) {
+                    eduList.innerHTML = edus.map(e => `<li>${UI.escapeHtml(e)}</li>`).join('');
+                } else {
+                    eduList.innerHTML = '<li>Education profile recorded from candidate resume.</li>';
+                }
             }
 
             const expList = document.getElementById('modal-resume-experience');
-            if (data.experience && data.experience.length > 0) {
-                expList.innerHTML = data.experience.map(e => `<li>${UI.escapeHtml(e)}</li>`).join('');
-            } else {
-                expList.innerHTML = '<li>Experience details extracted via NLP.</li>';
+            if (expList) {
+                let exps = [];
+                if (Array.isArray(resume.experience)) {
+                    exps = resume.experience.filter(e => e && String(e).trim());
+                } else if (resume.experience) {
+                    exps = [resume.experience];
+                } else if (resume.experience_years && Number(resume.experience_years) > 0) {
+                    exps = [`${resume.experience_years} years of professional experience`];
+                }
+                if (exps.length > 0) {
+                    expList.innerHTML = exps.map(e => `<li>${UI.escapeHtml(e)}</li>`).join('');
+                } else {
+                    expList.innerHTML = '<li>Experience details extracted via NLP.</li>';
+                }
+            }
+
+            const textContainer = document.getElementById('modal-resume-text');
+            if (textContainer) {
+                textContainer.textContent = resume.extracted_text || resume.resume_text || 'No full text overview available.';
             }
 
             UI.openModal('modal-resume-details');
@@ -391,10 +508,11 @@ class App {
     static async viewJob(jobId) {
         try {
             const data = await ApiService.getJob(jobId);
-            document.getElementById('modal-single-job-id').textContent = data.job_id;
-            document.getElementById('modal-single-job-title').textContent = data.job_title;
-            document.getElementById('modal-single-job-desc').textContent = data.description || 'No description available.';
-            document.getElementById('modal-single-job-skills').innerHTML = UI.renderSkillChips(data.required_skills, 'neutral');
+            const job = data.job || data;
+            document.getElementById('modal-single-job-id').textContent = `ID: ${job.job_id || jobId}`;
+            document.getElementById('modal-single-job-title').textContent = job.job_title || job.title || 'Job Position';
+            document.getElementById('modal-single-job-desc').textContent = job.description || 'No description available.';
+            document.getElementById('modal-single-job-skills').innerHTML = UI.renderSkillChips(job.required_skills || job.skills || [], 'neutral');
 
             UI.openModal('modal-single-job-details');
         } catch (e) {

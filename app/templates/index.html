@@ -91,10 +91,6 @@
                 </div>
 
                 <div class="topbar-right">
-                    <div class="system-health-pill" id="system-health-pill">
-                        <span class="status-dot"></span>
-                        <span>Checking Status...</span>
-                    </div>
                     <button class="btn btn-primary btn-sm" onclick="UI.openModal('modal-upload-resume')">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                         <span>Upload Resume</span>
@@ -147,65 +143,26 @@
                                 <i class="fa-solid fa-bolt"></i>
                             </div>
                         </div>
-
-                        <div class="metric-card">
-                            <div class="metric-data">
-                                <span class="metric-label">Inference Engine</span>
-                                <span class="metric-value" style="font-size:1.3rem;" id="stat-model-name">tfidf_svm</span>
-                                <span class="metric-subtext">LinearSVC (C=1.0, balanced)</span>
-                            </div>
-                            <div class="metric-icon-wrap icon-amber">
-                                <i class="fa-solid fa-microchip"></i>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- Dashboard Grid: Quick Match + System Info -->
-                    <div class="dashboard-grid">
-                        <div class="quick-match-box">
-                            <div class="quick-match-header">
-                                <h3 class="quick-match-title">
-                                    <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-brand-accent);"></i> Quick Match Evaluation
-                                </h3>
-                                <p class="quick-match-desc">Select an uploaded resume to compute multi-job matching against all benchmark jobs.</p>
-                            </div>
-                            <div class="quick-match-form">
-                                <div class="form-group">
-                                    <label class="form-label" for="dashboard-resume-select">Select Candidate Resume</label>
-                                    <select class="form-select" id="dashboard-resume-select">
-                                        <option value="">Loading resumes...</option>
-                                    </select>
-                                </div>
-                                <button class="btn btn-primary" id="btn-dashboard-match">
-                                    <i class="fa-solid fa-play"></i> Run Multi-Job Matching
-                                </button>
-                            </div>
+                    <!-- Dashboard Quick Match -->
+                    <div class="quick-match-box" style="margin-bottom: 2rem;">
+                        <div class="quick-match-header">
+                            <h3 class="quick-match-title">
+                                <i class="fa-solid fa-wand-magic-sparkles" style="color:var(--color-brand-accent);"></i> Quick Match Evaluation
+                            </h3>
+                            <p class="quick-match-desc">Select an uploaded resume to compute multi-job matching against all benchmark jobs.</p>
                         </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title"><i class="fa-solid fa-server"></i> System Architecture</h3>
+                        <div class="quick-match-form">
+                            <div class="form-group">
+                                <label class="form-label" for="dashboard-resume-select">Select Candidate Resume</label>
+                                <select class="form-select" id="dashboard-resume-select">
+                                    <option value="">Loading resumes...</option>
+                                </select>
                             </div>
-                            <div class="card-body">
-                                <div class="system-status-list">
-                                    <div class="system-status-item">
-                                        <span class="status-label">Model Architecture</span>
-                                        <span class="status-val">LinearSVC (scikit-learn)</span>
-                                    </div>
-                                    <div class="system-status-item">
-                                        <span class="status-label">Feature Pipeline</span>
-                                        <span class="status-val">TF-IDF (5,000 unigrams/bigrams)</span>
-                                    </div>
-                                    <div class="system-status-item">
-                                        <span class="status-label">Decision Threshold</span>
-                                        <span class="status-val">&theta; = 0.0000 (signed score)</span>
-                                    </div>
-                                    <div class="system-status-item">
-                                        <span class="status-label">Ranking Semantics</span>
-                                        <span class="status-val">decision_score DESC, job_id ASC</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <button class="btn btn-primary" id="btn-dashboard-match">
+                                <i class="fa-solid fa-play"></i> Run Multi-Job Matching
+                            </button>
                         </div>
                     </div>
 
@@ -477,8 +434,8 @@
                         <span class="text-tertiary" style="font-size:0.75rem; margin-top:0.25rem; display:block;">Supported format: PDF only (max 10MB)</span>
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="resume-custom-id">Custom Resume ID (Optional)</label>
-                        <input type="text" class="form-control" id="resume-custom-id" placeholder="e.g. candidate_john_doe">
+                        <label class="form-label" for="resume-custom-id">Custom Resume Name / ID (Optional)</label>
+                        <input type="text" class="form-control" id="resume-custom-id" placeholder="e.g. RES001, res001, or candidate_alex">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -499,15 +456,36 @@
                 <button class="modal-close" onclick="UI.closeModal('modal-resume-details')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <div style="margin-bottom:1.25rem;">
-                    <h4 id="modal-resume-name" style="font-family:var(--font-display); font-size:1.25rem; font-weight:700;">Candidate</h4>
-                    <span class="text-tertiary" id="modal-resume-id" style="font-family:var(--font-mono); font-size:0.8rem;">ID: -</span>
+                <div style="margin-bottom:1.5rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.15rem 1.25rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div>
+                            <h4 id="modal-resume-name" style="font-family:var(--font-display); font-size:1.35rem; font-weight:700; margin:0; color:var(--text-primary);">Candidate Name</h4>
+                            <div id="modal-resume-role" style="font-size:0.92rem; font-weight:600; color:var(--color-brand-accent); margin-top:0.25rem;">Software Engineer</div>
+                        </div>
+                        <span class="badge badge-brand" id="modal-resume-id" style="font-family:var(--font-mono); font-size:0.82rem;">ID: RES001</span>
+                    </div>
+                    
+                    <div style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:center; font-size:0.88rem; border-top:1px solid var(--border-color); padding-top:0.75rem; margin-top:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.45rem;">
+                            <i class="fa-solid fa-envelope" style="color:var(--color-brand-accent);"></i>
+                            <a id="modal-resume-email-link" href="#" class="contact-link" style="color:var(--color-brand); text-decoration:underline; font-weight:500;">
+                                <span id="modal-resume-email">candidate@example.com</span>
+                            </a>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.45rem;">
+                            <i class="fa-solid fa-phone" style="color:var(--color-brand-accent);"></i>
+                            <a id="modal-resume-phone-link" href="#" class="contact-link" style="color:var(--text-primary); text-decoration:none; font-weight:500;">
+                                <span id="modal-resume-phone">+1 (555) 019-2834</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
+
                 <div style="margin-bottom:1.5rem;">
                     <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Extracted Skills</h5>
                     <div class="skill-chips" id="modal-resume-skills"></div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:1.5rem;">
                     <div>
                         <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Education</h5>
                         <ul id="modal-resume-education" style="padding-left:1.25rem; font-size:0.88rem; color:var(--text-secondary);"></ul>
@@ -516,6 +494,11 @@
                         <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Experience Summary</h5>
                         <ul id="modal-resume-experience" style="padding-left:1.25rem; font-size:0.88rem; color:var(--text-secondary);"></ul>
                     </div>
+                </div>
+
+                <div>
+                    <h5 style="font-size:0.85rem; font-weight:600; text-transform:uppercase; color:var(--text-tertiary); margin-bottom:0.5rem;">Resume Content / Overview</h5>
+                    <div id="modal-resume-text" style="background:var(--bg-card); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1rem; font-size:0.88rem; color:var(--text-secondary); max-height:200px; overflow-y:auto; line-height:1.6; white-space:pre-wrap;"></div>
                 </div>
             </div>
             <div class="modal-footer">

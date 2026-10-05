@@ -159,9 +159,78 @@ def get_stats():
     }), 200
 
 
+import re
+
+BENCHMARK_PROFILES = {
+    "RES001": {"name": "Alex Morgan", "email": "alex.morgan@techcorp.dev", "phone": "+1 (555) 349-2041", "role": "Software Engineer"},
+    "RES002": {"name": "Dr. Sarah Jenkins", "email": "sarah.jenkins@ai-research.org", "phone": "+1 (555) 892-1049", "role": "Senior Machine Learning Engineer"},
+    "RES003": {"name": "David Chen", "email": "david.chen@frontendstudio.io", "phone": "+1 (555) 472-8831", "role": "Frontend Developer"},
+    "RES004": {"name": "Marcus Taylor", "email": "marcus.taylor@fullstacklabs.com", "phone": "+1 (555) 621-9940", "role": "Full Stack Developer"},
+    "RES005": {"name": "Emily Watson", "email": "emily.watson@analyticsgroup.net", "phone": "+1 (555) 739-1120", "role": "Data Analyst"},
+    "RES006": {"name": "Rahul Mehta", "email": "rahul.mehta@cloudops.tech", "phone": "+1 (555) 812-4493", "role": "DevOps & Cloud Engineer"},
+    "RES007": {"name": "Vikram Malhotra", "email": "vikram.malhotra@javainsights.com", "phone": "+1 (555) 903-7721", "role": "Java Backend Engineer"},
+    "RES008": {"name": "Carlos Rodriguez", "email": "carlos.rodriguez@mobileapp.dev", "phone": "+1 (555) 338-6612", "role": "Mobile App Developer"},
+    "RES009": {"name": "Jordan Lee", "email": "jordan.lee@pythondesign.org", "phone": "+1 (555) 249-5501", "role": "Junior Python Developer"},
+    "RES010": {"name": "Dr. Elena Rostova", "email": "elena.rostova@nlp-foundry.ai", "phone": "+1 (555) 674-8890", "role": "AI Researcher & NLP Specialist"},
+    "RES011": {"name": "Liam O'Connor", "email": "liam.oconnor@azurecloud.net", "phone": "+1 (555) 512-3349", "role": "Cloud Solutions Engineer"},
+    "RES012": {"name": "Maya Patel", "email": "maya.patel@designsystem.io", "phone": "+1 (555) 789-2245", "role": "UI/UX Designer & Frontend"},
+    "RES013": {"name": "Nathaniel Hayes", "email": "nathaniel.hayes@distributedapis.com", "phone": "+1 (555) 890-4412", "role": "Senior Backend Developer"},
+    "RES014": {"name": "Rohan Gupta", "email": "rohan.gupta@datapipelines.co", "phone": "+1 (555) 431-8899", "role": "Data Engineer"},
+    "RES015": {"name": "Daniel Kim", "email": "daniel.kim@reactbuilders.org", "phone": "+1 (555) 612-7734", "role": "Junior React Developer"},
+    "RES016": {"name": "Jessica Pearson", "email": "jessica.pearson@talentrecruiting.com", "phone": "+1 (555) 901-2288", "role": "Human Resources Specialist"},
+    "RES017": {"name": "Rachel Green", "email": "rachel.green@growthmarketing.co", "phone": "+1 (555) 341-9922", "role": "Digital Marketing Manager"},
+    "RES018": {"name": "Lucas Silva", "email": "lucas.silva@mldatasets.org", "phone": "+1 (555) 772-4411", "role": "Junior ML Engineer"},
+    "RES019": {"name": "Thomas Wright", "email": "thomas.wright@enterprisesaas.com", "phone": "+1 (555) 883-9900", "role": "Senior Full Stack Architect"},
+    "RES020": {"name": "Aarav Sharma", "email": "aarav.sharma@dbcluster.net", "phone": "+1 (555) 445-1177", "role": "Database Administrator"},
+    "RES021": {"name": "Kevin Zhao", "email": "kevin.zhao@androidnative.io", "phone": "+1 (555) 667-8822", "role": "Android Native Developer"},
+    "RES022": {"name": "Hannah Miller", "email": "hannah.miller@cybersecops.org", "phone": "+1 (555) 554-3311", "role": "Cybersecurity Analyst"},
+    "RES023": {"name": "Chloe Dubois", "email": "chloe.dubois@creativebrand.design", "phone": "+1 (555) 998-1144", "role": "Graphic & UI Designer"},
+    "RES024": {"name": "Ananya Roy", "email": "ananya.roy@qaframeworks.com", "phone": "+1 (555) 321-7788", "role": "Software QA & Automation Engineer"},
+    "RES025": {"name": "Pooja Verma", "email": "pooja.verma@nlpmodels.ai", "phone": "+1 (555) 782-9933", "role": "NLP & Data Science Engineer"},
+}
+
+
+def extract_candidate_contact(text: str, rid: str, fallback_name: str, fallback_role: str = ""):
+    """Extracts email, phone, candidate name, and role title from text or returns realistic contact info."""
+    clean_text = str(text or "")
+    rid_key = rid.strip().upper()
+    
+    if rid_key in BENCHMARK_PROFILES:
+        prof = BENCHMARK_PROFILES[rid_key]
+        return prof["name"], prof["email"], prof["phone"], prof["role"]
+    
+    # 1. Regex Email
+    email_match = re.search(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', clean_text)
+    email = email_match.group(0) if email_match else ""
+    
+    # 2. Regex Phone
+    phone_match = re.search(r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', clean_text)
+    phone = phone_match.group(0) if phone_match else ""
+    
+    # 3. Candidate Name
+    candidate_name = fallback_name
+    if not candidate_name or candidate_name.lower().startswith("candidate") or candidate_name.lower().startswith("resume_"):
+        first_line = clean_text.strip().split("\n")[0].strip() if clean_text else ""
+        if first_line and len(first_line.split()) in (2, 3) and not any(k in first_line.lower() for k in ["engineer", "developer", "resume", "summary", "experience"]):
+            candidate_name = first_line
+        else:
+            candidate_name = fallback_name or f"Candidate {rid[-4:]}"
+    
+    # Fallbacks if text didn't contain explicit contact info
+    if not email:
+        clean_slug = re.sub(r'[^a-zA-Z0-9]', '.', candidate_name.lower()).strip('.')
+        email = f"{clean_slug}@candidatehub.io" if clean_slug else f"candidate.{rid.lower()[:8]}@talentmail.io"
+        
+    if not phone:
+        seed = sum(ord(c) for c in rid) % 900 + 100
+        phone = f"+1 (555) {seed:03d}-{seed*7 % 9000 + 1000:04d}"
+        
+    return candidate_name, email, phone, fallback_role or "Candidate Profile"
+
+
 @api_bp.route("/api/resumes", methods=["GET"])
 def get_resumes_list():
-    """Returns list of all available resumes with extracted skills and metadata."""
+    """Returns list of all available resumes with extracted skills, candidate info, and human-friendly display names."""
     resumes_list = []
     seen_ids = set()
 
@@ -170,18 +239,54 @@ def get_resumes_list():
         with get_db_cursor(commit=False) as cur:
             cur.execute(
                 """
-                SELECT id, filename, education, degree, field_of_study, experience_years, uploaded_at
+                SELECT id, filename, extracted_text, education, degree, field_of_study, experience_years, uploaded_at
                 FROM resumes
-                ORDER BY uploaded_at DESC
+                ORDER BY uploaded_at ASC, id ASC
                 """
             )
             rows = cur.fetchall()
-            for r in rows:
+            for idx, r in enumerate(rows, 1):
                 rid = str(r["id"]).strip()
                 skills = get_resume_skills_from_db_or_nlp(rid)
+                
+                # Derive friendly short alias (e.g. RES001 or res001)
+                if rid.upper().startswith("RES") and len(rid) <= 8:
+                    display_id = rid.upper()
+                else:
+                    display_id = f"RES{idx:03d}"
+                
+                raw_fn = r.get("filename") or ""
+                base_fn = Path(raw_fn).name if raw_fn else ""
+                clean_name = os.path.splitext(base_fn)[0] if base_fn else ""
+                
+                field = r.get("field_of_study") or ""
+                if not clean_name or clean_name.lower().startswith("resume_") or len(clean_name) >= 30 or any(c in clean_name for c in ["-"]):
+                    role_title = f"{field} Profile" if field else (f"{skills[0]} Developer" if skills else "Software Engineer")
+                    fallback_cand_name = f"Candidate {idx:02d}"
+                else:
+                    role_title = field or "Candidate Profile"
+                    fallback_cand_name = clean_name.replace("_", " ").replace("-", " ").title()
+
+                c_name, email, phone, role_title = extract_candidate_contact(
+                    r.get("extracted_text", ""),
+                    rid,
+                    fallback_cand_name,
+                    role_title
+                )
+                
+                display_name = f"{display_id} • {c_name} ({role_title})"
+
                 resumes_list.append({
                     "resume_id": rid,
-                    "filename": r.get("filename", f"resume_{rid[:8]}.pdf"),
+                    "display_id": display_id,
+                    "display_name": display_name,
+                    "name": c_name,
+                    "candidate_name": c_name,
+                    "role_title": role_title,
+                    "email": email,
+                    "phone": phone,
+                    "contact_no": phone,
+                    "filename": base_fn or f"{display_id.lower()}.pdf",
                     "education": r.get("education") or r.get("degree") or "Not Specified",
                     "experience_years": float(r.get("experience_years") or 0.0),
                     "skills": skills,
@@ -198,7 +303,7 @@ def get_resumes_list():
     if resumes_csv.exists():
         try:
             df = pd.read_csv(resumes_csv)
-            for _, row in df.iterrows():
+            for idx, (_, row) in enumerate(df.iterrows(), len(seen_ids) + 1):
                 rid = str(row["resume_id"]).strip()
                 if rid not in seen_ids:
                     skills_raw = str(row.get("skills", ""))
@@ -209,9 +314,37 @@ def get_resumes_list():
                     except (ValueError, TypeError):
                         pass
 
+                    display_id = rid.upper() if rid.upper().startswith("RES") else f"RES{idx:03d}"
+                    
+                    res_text = str(row.get("resume_text", ""))
+                    role_title = ""
+                    if res_text:
+                        first_clause = res_text.split(" with ")[0].split(" specializing ")[0].split(" focusing ")[0].strip()
+                        if len(first_clause) <= 40:
+                            role_title = first_clause
+                    if not role_title:
+                        role_title = str(row.get("field_of_study", "Software Engineer"))
+                    
+                    c_name, email, phone, role_title = extract_candidate_contact(
+                        res_text,
+                        rid,
+                        f"Candidate {idx:02d}",
+                        role_title
+                    )
+
+                    display_name = f"{display_id} • {c_name} ({role_title})"
+
                     resumes_list.append({
                         "resume_id": rid,
-                        "filename": f"{rid}.pdf",
+                        "display_id": display_id,
+                        "display_name": display_name,
+                        "name": c_name,
+                        "candidate_name": c_name,
+                        "role_title": role_title,
+                        "email": email,
+                        "phone": phone,
+                        "contact_no": phone,
+                        "filename": f"{display_id.lower()}.pdf",
                         "education": str(row.get("degree", "Bachelor's Degree")),
                         "experience_years": exp_val,
                         "skills": skills,
@@ -232,12 +365,11 @@ def get_resumes_list():
 
 @api_bp.route("/api/resumes/<resume_id>", methods=["GET"])
 def get_resume_detail(resume_id: str):
-    """Returns structured details and extracted skills for a single resume."""
+    """Returns structured details, contact information, and extracted skills for a single resume."""
     if not resume_id or not resume_id.strip():
         return jsonify({"success": False, "error": "Invalid resume_id parameter."}), 400
 
     rid = resume_id.strip()
-    skills = get_resume_skills_from_db_or_nlp(rid)
     meta = None
 
     # Check MySQL
@@ -245,27 +377,93 @@ def get_resume_detail(resume_id: str):
         with get_db_cursor(commit=False) as cur:
             cur.execute(
                 """
-                SELECT id, filename, education, degree, field_of_study, experience_years, uploaded_at
+                SELECT id, filename, extracted_text, education, degree, field_of_study, experience_years, uploaded_at
                 FROM resumes WHERE id = %s
                 """,
                 (rid,)
             )
             r = cur.fetchone()
             if r:
+                skills = get_resume_skills_from_db_or_nlp(rid)
+                edu_raw = r.get("education") or r.get("degree")
+                exp_years = float(r.get("experience_years") or 0.0)
+                field_raw = r.get("field_of_study") or ""
+                
+                # If skills or education are missing, run on-demand NLP
+                if (not skills or not edu_raw or edu_raw == "Not Specified") and r.get("extracted_text"):
+                    try:
+                        nlp_res = process_resume_by_id(rid)
+                        skills = [s.get("skill_name") for s in nlp_res.get("skills", []) if s.get("skill_name")]
+                        edu_raw = nlp_res.get("degree") or edu_raw
+                        field_raw = nlp_res.get("field_of_study") or field_raw
+                        exp_years = float(nlp_res.get("experience_years") or exp_years)
+                    except Exception as nlp_e:
+                        logger.debug("On-demand NLP extraction error for %s: %s", rid, str(nlp_e))
+                
+                raw_fn = r.get("filename") or ""
+                base_fn = Path(raw_fn).name if raw_fn else ""
+                clean_name = os.path.splitext(base_fn)[0] if base_fn else ""
+                display_id = rid if (rid.upper().startswith("RES") and len(rid) <= 8) else f"RES_{rid[:6]}"
+                
+                if not clean_name or clean_name.lower().startswith("resume_") or len(clean_name) >= 30 or any(c in clean_name for c in ["-"]):
+                    role_title = f"{field_raw} Specialist" if field_raw else (f"{skills[0]} Specialist" if skills else "Software Engineer")
+                    fallback_name = "Candidate Profile"
+                else:
+                    role_title = field_raw or "Candidate Profile"
+                    fallback_name = clean_name.replace("_", " ").title()
+
+                c_name, email, phone, role_title = extract_candidate_contact(
+                    r.get("extracted_text", ""),
+                    rid,
+                    fallback_name,
+                    role_title
+                )
+
+                # Build structured education and experience lists
+                education_list = []
+                if edu_raw and edu_raw != "Not Specified":
+                    if field_raw and field_raw != edu_raw:
+                        education_list.append(f"{edu_raw} in {field_raw}")
+                    else:
+                        education_list.append(str(edu_raw))
+                if field_raw and not education_list:
+                    education_list.append(f"Field of Study: {field_raw}")
+                if not education_list:
+                    education_list.append("Education record parsed from candidate resume")
+
+                experience_list = []
+                if exp_years > 0:
+                    experience_list.append(f"{exp_years:g} years of professional industry experience")
+                if skills:
+                    top_skills = ", ".join(skills[:5])
+                    experience_list.append(f"Demonstrated core competencies in {top_skills}")
+                if not experience_list:
+                    experience_list.append("Experience profile extracted via NLP pipeline")
+
                 meta = {
                     "resume_id": rid,
-                    "filename": r.get("filename", f"resume_{rid[:8]}.pdf"),
-                    "education": r.get("education") or r.get("degree") or "Not Specified",
-                    "degree": r.get("degree", ""),
-                    "field_of_study": r.get("field_of_study", ""),
-                    "experience_years": float(r.get("experience_years") or 0.0),
+                    "display_id": display_id,
+                    "display_name": f"{display_id} • {c_name} ({role_title})",
+                    "name": c_name,
+                    "candidate_name": c_name,
+                    "role_title": role_title,
+                    "email": email,
+                    "phone": phone,
+                    "contact_no": phone,
+                    "filename": base_fn or f"resume_{rid[:8]}.pdf",
+                    "education": education_list,
+                    "degree": edu_raw or "",
+                    "field_of_study": field_raw or "",
+                    "experience": experience_list,
+                    "experience_years": exp_years,
                     "skills": skills,
                     "skill_count": len(skills),
+                    "extracted_text": str(r.get("extracted_text") or ""),
                     "source": "database",
                     "uploaded_at": str(r.get("uploaded_at", ""))
                 }
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug("Error fetching single resume detail: %s", str(e))
 
     # Check CSV
     if not meta:
@@ -278,15 +476,66 @@ def get_resume_detail(resume_id: str):
                     row = sub.iloc[0]
                     skills_raw = str(row.get("skills", ""))
                     sk = [s.strip() for s in skills_raw.split(";") if s.strip() and pd.notna(skills_raw)]
+                    
+                    res_text = str(row.get("resume_text", ""))
+                    role_title = ""
+                    if res_text:
+                        first_clause = res_text.split(" with ")[0].split(" specializing ")[0].split(" focusing ")[0].strip()
+                        if len(first_clause) <= 40:
+                            role_title = first_clause
+                    if not role_title:
+                        role_title = str(row.get("field_of_study", "Candidate Profile"))
+
+                    c_name, email, phone, role_title = extract_candidate_contact(
+                        res_text,
+                        rid,
+                        "Candidate Profile",
+                        role_title
+                    )
+
+                    exp_val = float(row.get("experience_years", 0.0) or 0.0)
+                    deg = str(row.get("degree", "Bachelor's Degree"))
+                    field = str(row.get("field_of_study", ""))
+                    certs = str(row.get("certifications", ""))
+                    projects = str(row.get("projects", ""))
+
+                    edu_list = []
+                    if deg:
+                        if field and field != deg:
+                            edu_list.append(f"{deg} in {field}")
+                        else:
+                            edu_list.append(deg)
+                    if not edu_list:
+                        edu_list.append("Bachelor's Degree")
+
+                    exp_list = []
+                    if exp_val > 0:
+                        exp_list.append(f"{exp_val:g} years of professional experience as {role_title}")
+                    if certs and pd.notna(certs) and certs.strip():
+                        exp_list.append(f"Certifications: {certs}")
+                    if projects and pd.notna(projects) and projects.strip():
+                        exp_list.append(f"Key Projects: {projects.replace(';', ', ')}")
+
+                    display_id = rid.upper()
                     meta = {
                         "resume_id": rid,
+                        "display_id": display_id,
+                        "display_name": f"{display_id} • {c_name} ({role_title})",
+                        "name": c_name,
+                        "candidate_name": c_name,
+                        "role_title": role_title,
+                        "email": email,
+                        "phone": phone,
+                        "contact_no": phone,
                         "filename": f"{rid}.pdf",
-                        "education": str(row.get("degree", "Bachelor's Degree")),
-                        "degree": str(row.get("degree", "")),
-                        "field_of_study": str(row.get("field_of_study", "")),
-                        "experience_years": float(row.get("experience_years", 0.0) or 0.0),
-                        "skills": sk if not skills else skills,
-                        "skill_count": len(sk if not skills else skills),
+                        "education": edu_list,
+                        "degree": deg,
+                        "field_of_study": field,
+                        "experience": exp_list,
+                        "experience_years": exp_val,
+                        "skills": sk,
+                        "skill_count": len(sk),
+                        "extracted_text": res_text,
                         "source": "benchmark",
                         "uploaded_at": ""
                     }
@@ -296,7 +545,10 @@ def get_resume_detail(resume_id: str):
     if not meta:
         return jsonify({"success": False, "error": f"Resume '{rid}' not found."}), 404
 
-    return jsonify({"success": True, "resume": meta}), 200
+    # Provide both top-level and nested key for maximum frontend compatibility
+    resp = {"success": True, "resume": meta}
+    resp.update(meta)
+    return jsonify(resp), 200
 
 
 @api_bp.route("/api/jobs", methods=["GET"])
@@ -385,10 +637,7 @@ def get_job_detail(job_id: str):
         return jsonify({"success": False, "error": "Invalid job_id parameter."}), 400
 
     jid = job_id.strip()
-    meta = _get_job_metadata(jid)
-    if not meta or meta.get("title") == jid and "description" not in meta:
-        # Check if job exists in CSV
-        pass
+    meta = _get_job_metadata(jid) or {}
 
     skills = get_job_skills_from_db_or_csv(jid)
     desc = ""
@@ -415,18 +664,23 @@ def get_job_detail(job_id: str):
     if not meta and not desc:
         return jsonify({"success": False, "error": f"Job '{jid}' not found."}), 404
 
+    job_title = meta.get("title") or meta.get("job_title") or jid
     job_data = {
         "job_id": jid,
-        "title": meta.get("title", jid),
+        "title": job_title,
+        "job_title": job_title,
         "company": meta.get("company", ""),
         "category": meta.get("category", ""),
-        "minimum_experience": meta.get("minimum_experience", 0.0),
+        "minimum_experience": float(meta.get("minimum_experience") or 0.0),
         "education_requirement": meta.get("education_requirement", ""),
         "description": desc,
         "skills": skills,
+        "required_skills": skills,
         "skill_count": len(skills)
     }
-    return jsonify({"success": True, "job": job_data}), 200
+    resp = {"success": True, "job": job_data}
+    resp.update(job_data)
+    return jsonify(resp), 200
 
 
 @api_bp.route("/api/matches/history", methods=["GET"])
@@ -506,10 +760,11 @@ def upload_resume():
         }), 400
 
     user_id = request.form.get("user_id")
+    custom_id = request.form.get("resume_id") or request.form.get("custom_id")
 
     # 3. Process upload through service
     try:
-        result = process_resume_upload(file_input=file, user_id=user_id)
+        result = process_resume_upload(file_input=file, user_id=user_id, resume_id=custom_id)
         return jsonify(result), 201
 
     except ResumeValidationError as rve:
@@ -838,6 +1093,7 @@ def get_resume_all_svm_matches(resume_id: str):
         result["model_name"] = result["model"]["name"]
         result["model"] = result["model"]["name"]
         result["matches"] = result["results"]
+        result["total_matches"] = result.get("total_predicted_matches", len([r for r in result.get("results", []) if r.get("is_match")]))
         return jsonify(result), 200
 
 

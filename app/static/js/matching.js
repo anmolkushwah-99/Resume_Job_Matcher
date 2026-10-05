@@ -42,7 +42,9 @@ class MatchingController {
 
             this.renderSummaryBanner(data);
             this.renderFilteredResults();
-            UI.showToast(`Evaluated ${data.total_jobs_evaluated || this.currentResults.length} jobs. ${data.total_matches || 0} predicted matches found.`, 'success');
+            const evaluatedCount = data.total_jobs_evaluated ?? this.currentResults.length;
+            const matchCount = data.total_predicted_matches ?? data.total_matches ?? this.currentResults.filter(r => r.is_match).length;
+            UI.showToast(`Evaluated ${evaluatedCount} jobs. ${matchCount} predicted matches found.`, 'success');
         } catch (error) {
             if (loadingState) loadingState.style.display = 'none';
             if (emptyState) emptyState.style.display = 'flex';
@@ -58,9 +60,10 @@ class MatchingController {
         if (!banner) return;
 
         banner.style.display = 'flex';
-        document.getElementById('summary-resume-name').textContent = `Resume ID: ${data.resume_id}`;
+        const resLabel = window.App ? window.App.getResumeLabel(data.resume_id) : data.resume_id;
+        document.getElementById('summary-resume-name').textContent = `Resume: ${resLabel}`;
         document.getElementById('summary-jobs-evaluated').textContent = data.total_jobs_evaluated ?? this.currentResults.length;
-        document.getElementById('summary-predicted-matches').textContent = data.total_matches ?? this.currentResults.filter(r => r.is_match).length;
+        document.getElementById('summary-predicted-matches').textContent = data.total_predicted_matches ?? data.total_matches ?? this.currentResults.filter(r => r.is_match).length;
         document.getElementById('summary-top-score').textContent = this.currentResults.length > 0 ? UI.formatDecisionScore(this.currentResults[0].decision_score) : '0.0000';
     }
 
@@ -187,8 +190,9 @@ class MatchingController {
         // Fetch full job description if available
         try {
             const jobData = await ApiService.getJob(jobId);
-            document.getElementById('modal-job-desc').textContent = jobData.description || 'No description provided.';
-            document.getElementById('modal-job-skills').innerHTML = UI.renderSkillChips(jobData.required_skills, 'neutral');
+            const job = jobData.job || jobData;
+            document.getElementById('modal-job-desc').textContent = job.description || 'No description provided.';
+            document.getElementById('modal-job-skills').innerHTML = UI.renderSkillChips(job.required_skills || job.skills || [], 'neutral');
         } catch (e) {
             document.getElementById('modal-job-desc').textContent = 'Unable to load full job description.';
         }
